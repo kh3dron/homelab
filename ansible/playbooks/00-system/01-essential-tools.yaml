@@ -1,0 +1,23 @@
+---
+- name: Install essential tools
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install essential packages
+      apt:
+        name:
+          - vim
+          - btop
+          - htop
+          - git
+          - curl
+          - wget
+          - iotop
+          - lm-sensors
+          - smartmontools
+          - nfs-common
+          - glances
+          - golang
+        state: present
+        update_cache: yes

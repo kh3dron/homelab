@@ -1,0 +1,24 @@
+---
+- name: Install base packages
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      
+    - name: Upgrade all packages
+      apt:
+        upgrade: yes
+        autoremove: yes
+        
+    - name: Install GPG tools packages
+      apt:
+        name:
+          - gnupg
+          - gpgv
+          - make
+        state: present
+        update_cache: no
+      ignore_errors: no
