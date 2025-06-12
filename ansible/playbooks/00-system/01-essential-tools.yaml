@@ -7,17 +7,21 @@
     - name: Install essential packages
       apt:
         name:
+          # editing
           - vim
+          # health
           - btop
           - htop
+          - iotop
+          - lm-sensors
+          - glances
+          - powertop
+          - tlp
+          # system
           - git
           - curl
           - wget
-          - iotop
-          - lm-sensors
-          - smartmontools
           - nfs-common
-          - glances
           - golang
         state: present
         update_cache: yes

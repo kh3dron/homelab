@@ -40,9 +40,6 @@
         block: |
           # Run neofetch at login
           neofetch
-
-          # Set bash prompt color to red
-          PS1='\e[31m\u@\h:\w\$ \e[m'
         marker: "# {mark} ANSIBLE MANAGED BLOCK - NEOFETCH"
         
     - name: Create .hushlogin to disable MOTD

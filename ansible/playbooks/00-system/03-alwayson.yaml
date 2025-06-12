@@ -1,0 +1,42 @@
+---
+- name: Configure system for always-on operation
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Enable and start TLP service
+      service:
+        name: tlp
+        state: started
+        enabled: yes
+
+    - name: Configure system to disable sleep
+      lineinfile:
+        path: /etc/systemd/sleep.conf
+        regexp: "^#?AllowSuspend="
+        line: "AllowSuspend=no"
+      notify: Restart systemd
+
+    - name: Disable automatic suspend
+      lineinfile:
+        path: /etc/systemd/sleep.conf
+        regexp: "^#?AllowHibernation="
+        line: "AllowHibernation=no"
+      notify: Restart systemd
+
+    - name: Configure CPU performance governor for server workloads
+      lineinfile:
+        path: /etc/tlp.conf
+        regexp: "^#?CPU_SCALING_GOVERNOR_ON_AC="
+        line: "CPU_SCALING_GOVERNOR_ON_AC=performance"
+      notify: Restart TLP
+
+  handlers:
+    - name: Restart systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Restart TLP
+      service:
+        name: tlp
+        state: restarted

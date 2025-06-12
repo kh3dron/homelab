@@ -2,3 +2,5 @@
 - import_playbook: 00-base-packages.yaml
 - import_playbook: 01-essential-tools.yaml
 - import_playbook: 02-neofetch.yaml
+- import_playbook: 03-alwayson.yaml
+- import_playbook: 04-docker.yaml

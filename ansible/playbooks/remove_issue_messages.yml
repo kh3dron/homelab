@@ -1,5 +1,0 @@
----
-- name: Remove issue messages
-  hosts: all
-  roles:
-    - common 

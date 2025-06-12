@@ -1,0 +1,57 @@
+---
+- name: Install kubectl
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install packages needed for Kubernetes apt repository
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Create keyrings directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Check if Kubernetes apt keyring exists
+      stat:
+        path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      register: k8s_keyring
+
+    - name: Download Kubernetes apt keyring
+      shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      when: not k8s_keyring.stat.exists
+      changed_when: true
+
+    - name: Set permissions on Kubernetes apt keyring
+      file:
+        path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        mode: '0644'
+
+    - name: Check if Kubernetes apt repository exists
+      stat:
+        path: /etc/apt/sources.list.d/kubernetes.list
+      register: k8s_repo
+
+    - name: Add Kubernetes apt repository
+      shell: echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' > /etc/apt/sources.list.d/kubernetes.list
+      when: not k8s_repo.stat.exists
+      changed_when: true
+
+    - name: Set permissions on Kubernetes repository file
+      file:
+        path: /etc/apt/sources.list.d/kubernetes.list
+        mode: '0644'
+
+    - name: Update apt package index and install kubectl
+      apt:
+        name: kubectl
+        state: present
+        update_cache: yes

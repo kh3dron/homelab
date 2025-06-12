@@ -1,0 +1,194 @@
+---
+- name: Install K3s Control Plane
+  hosts: ned
+  become: yes
+  
+  tasks:
+    - name: Check if k3s is already installed
+      command: which k3s
+      register: k3s_check
+      changed_when: false
+      failed_when: false
+
+    - name: Remove smartmontools service file
+      file:
+        path: /etc/systemd/system/smartmontools.service
+        state: absent
+      ignore_errors: yes
+
+    - name: Remove smartmontools service symlink
+      file:
+        path: /etc/systemd/system/multi-user.target.wants/smartmontools.service
+        state: absent
+      ignore_errors: yes
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+      ignore_errors: yes
+
+    - name: Mask bluetooth service
+      command: systemctl mask bluetooth.service
+      ignore_errors: yes
+
+    - name: Stop bluetooth service
+      command: systemctl stop bluetooth.service
+      ignore_errors: yes
+
+    - name: Check current cgroup configuration
+      command: cat /boot/firmware/cmdline.txt
+      register: cmdline_check
+      changed_when: false
+      failed_when: false
+
+    - name: Configure kernel parameters for K3s
+      lineinfile:
+        path: /boot/firmware/cmdline.txt
+        line: "{{ item }}"
+        state: present
+      with_items:
+        - cgroup_enable=cpuset
+        - cgroup_memory=1
+        - cgroup_enable=memory
+      when: "'cgroup_memory=1' not in cmdline_check.stdout"
+
+    - name: Reboot system if cgroup configuration changed
+      reboot:
+        msg: "Reboot initiated by Ansible for cgroup configuration"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+      when: "'cgroup_memory=1' not in cmdline_check.stdout"
+
+    - name: Wait for system to come back online
+      wait_for_connection:
+        delay: 20
+        timeout: 300
+      when: "'cgroup_memory=1' not in cmdline_check.stdout"
+
+    - name: Check if system is ready for K3s
+      block:
+        - name: Check if systemd is running
+          command: systemctl is-system-running
+          register: systemd_status
+          changed_when: false
+          failed_when: false
+
+        - name: Get failed systemd units
+          command: systemctl list-units --state=failed
+          register: failed_units
+          changed_when: false
+          failed_when: false
+
+        - name: Display failed units
+          debug:
+            var: failed_units.stdout_lines
+
+        - name: Get systemd journal for failed units
+          command: journalctl -p 3 -b
+          register: systemd_journal
+          changed_when: false
+          failed_when: false
+
+        - name: Display systemd journal errors
+          debug:
+            var: systemd_journal.stdout_lines
+
+        - name: Check if systemd is running
+          fail:
+            msg: "Systemd is not running properly. Current status: {{ systemd_status.stdout }}"
+          when: systemd_status.stdout != "running"
+
+        - name: Check if required ports are available
+          wait_for:
+            host: "{{ ansible_host | default(inventory_hostname) }}"
+            port: "{{ item }}"
+            state: started
+            timeout: 5
+          with_items:
+            - 6443
+            - 10250
+          ignore_errors: yes
+
+    - name: Download K3s installation script
+      get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: '0755'
+      when: k3s_check.rc != 0
+      
+    - name: Install K3s server
+      command: /tmp/k3s-install.sh
+      changed_when: true
+      when: k3s_check.rc != 0
+      register: k3s_install
+      
+    - name: Check K3s service status
+      command: systemctl status k3s
+      register: k3s_status
+      changed_when: false
+      failed_when: false
+
+    - name: Display K3s service status
+      debug:
+        var: k3s_status.stdout_lines
+
+    - name: Check K3s logs
+      command: journalctl -u k3s --no-pager -n 50
+      register: k3s_logs
+      changed_when: false
+      failed_when: false
+
+    - name: Display K3s logs
+      debug:
+        var: k3s_logs.stdout_lines
+      
+    - name: Wait for K3s to be ready
+      command: k3s kubectl get nodes
+      register: node_status
+      until: node_status.rc == 0
+      retries: 10
+      delay: 30
+      changed_when: false
+      failed_when: false
+
+    - name: Get K3s token
+      command: cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token
+      changed_when: false
+
+# - name: Install K3s Workers
+#   hosts:
+#     - maude
+#     - todd
+#     - rod
+#   become: yes
+  
+#   tasks:
+#     - name: Check if k3s is already installed
+#       command: which k3s
+#       register: k3s_check
+#       changed_when: false
+#       failed_when: false
+    
+#     - name: Download K3s installation script
+#       get_url:
+#         url: https://get.k3s.io
+#         dest: /tmp/k3s-install.sh
+#         mode: '0755'
+#       when: k3s_check.rc != 0
+      
+#     - name: Install K3s agent
+#       command: /tmp/k3s-install.sh agent --server https://{{ hostvars['ned']['ansible_host'] }}:6443 --token {{ hostvars['ned']['k3s_token'].stdout }}
+#       changed_when: true
+#       when: k3s_check.rc != 0
+#       register: k3s_install
+      
+#     - name: Wait for K3s to be ready
+#       command: k3s kubectl get nodes
+#       register: node_status
+#       until: node_status.rc == 0
+#       retries: 10
+#       delay: 30
+#       changed_when: false
+#       failed_when: false
