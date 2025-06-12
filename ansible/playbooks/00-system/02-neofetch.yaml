@@ -1,0 +1,63 @@
+---
+- name: Setup Neofetch with custom ASCII art
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install neofetch
+      apt:
+        name: neofetch
+        state: present
+        update_cache: yes
+      
+    - name: Create neofetch config directory
+      file:
+        path: /home/{{ ansible_user }}/.config/neofetch
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+      
+    - name: Copy custom ASCII art
+      copy:
+        src: ./assets/ascii.txt
+        dest: /home/{{ ansible_user }}/.config/neofetch/ascii.txt
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+      
+    - name: Configure neofetch
+      template:
+        src: ./templates/neofetch_config.conf.j2
+        dest: /home/{{ ansible_user }}/.config/neofetch/config.conf
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+    
+    - name: Set up neofetch in bashrc
+      blockinfile:
+        path: /home/{{ ansible_user }}/.bashrc
+        block: |
+          # Run neofetch at login
+          neofetch
+
+          # Set bash prompt color to red
+          PS1='\e[31m\u@\h:\w\$ \e[m'
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - NEOFETCH"
+        
+    - name: Create .hushlogin to disable MOTD
+      file:
+        path: /home/{{ ansible_user }}/.hushlogin
+        state: touch
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+    - name: Remove warning messages from issue files
+      blockinfile:
+        path: "{{ item }}"
+        block: ""
+        state: absent
+      with_items:
+        - /etc/issue
+        - /etc/issue.net
+      become: true 

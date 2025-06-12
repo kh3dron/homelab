@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Neofetch config file
+# https://github.com/dylanaraps/neofetch
+
+# See this wiki page for more info:
+# https://github.com/dylanaraps/neofetch/wiki/Customizing-Info
+
+print_info() {
+  info title
+  info "OS" distro
+  info "CPU" cpu
+  info "GPU" gpu
+  info "MEM" memory
+  info "DISK" disk
+  info "HOST" model
+  info "PKGS" packages
+  info "SHELL" shell
+  info "KERNEL" kernel
+  info "UPTIME" uptime
+  info "LOCAL IP" local_ip
+  info "PUBLIC IP" public_ip
+}
+
+image_backend="ascii"
+image_source="/home/{{ ansible_user }}/.config/neofetch/ascii.txt"
+ascii_distro="on"
+ascii_colors=(distro)
+ascii_bold="on"
