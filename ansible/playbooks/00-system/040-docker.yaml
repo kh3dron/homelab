@@ -1,6 +1,10 @@
 ---
 - name: Install Docker and Docker Compose
-  hosts: all
+  hosts:
+    - ned
+    - maude
+    - rod
+    - todd
   become: yes
   
   tasks:

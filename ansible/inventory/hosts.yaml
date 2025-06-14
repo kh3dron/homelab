@@ -15,28 +15,28 @@ all:
     huey_uname: "{{ lookup('ansible.builtin.pipe', 'op item get homelab.huey --fields username') }}"
     huey_pass: "{{ lookup('ansible.builtin.pipe', 'op item get homelab.huey --fields password --reveal') }}"
   hosts:
-    # huey:
-    #   ansible_host: 192.168.0.17
-    #   ansible_user: "{{ huey_uname }}"
-    #   ansible_become_pass: "{{ huey_pass }}"
+    huey:
+      ansible_host: 192.168.0.17
+      ansible_user: "{{ huey_uname }}"
+      ansible_become_pass: "{{ huey_pass }}"
+      ansible_connection: ssh
+    # maude:
+    #   ansible_host: 192.168.0.82
+    #   ansible_user: "{{ maude_uname }}"
+    #   ansible_become_pass: "{{ maude_pass }}"
     #   ansible_connection: ssh
-    maude:
-      ansible_host: 192.168.0.82
-      ansible_user: "{{ maude_uname }}"
-      ansible_become_pass: "{{ maude_pass }}"
-      ansible_connection: ssh
-    rod:
-      ansible_host: 192.168.0.83
-      ansible_user: "{{ rod_uname }}"
-      ansible_become_pass: "{{ rod_pass }}"
-      ansible_connection: ssh
-    ned:
-      ansible_host: 192.168.0.84
-      ansible_user: "{{ ned_uname }}"
-      ansible_become_pass: "{{ ned_pass }}"
-      ansible_connection: ssh
-    todd:
-      ansible_host: 192.168.0.85
-      ansible_user: "{{ todd_uname }}"
-      ansible_become_pass: "{{ todd_pass }}"
-      ansible_connection: ssh
+    # rod:
+    #   ansible_host: 192.168.0.83
+    #   ansible_user: "{{ rod_uname }}"
+    #   ansible_become_pass: "{{ rod_pass }}"
+    #   ansible_connection: ssh
+    # ned:
+    #   ansible_host: 192.168.0.84
+    #   ansible_user: "{{ ned_uname }}"
+    #   ansible_become_pass: "{{ ned_pass }}"
+    #   ansible_connection: ssh
+    # todd:
+    #   ansible_host: 192.168.0.85
+    #   ansible_user: "{{ todd_uname }}"
+    #   ansible_become_pass: "{{ todd_pass }}"
+    #   ansible_connection: ssh

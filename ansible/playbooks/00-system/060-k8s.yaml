@@ -50,30 +50,6 @@
             line: 'export PATH=$PATH:/home/{{ ansible_user }}/go/bin'
             state: present
     
-    - name: Install kubectl-aliases
-      block:
-        - name: Create .kubectl_aliases directory
-          file:
-            path: /home/{{ ansible_user }}/.kubectl_aliases
-            state: directory
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            mode: '0755'
-          
-        - name: Download kubectl-aliases
-          get_url:
-            url: https://raw.githubusercontent.com/ahmetb/kubectl-aliases/master/.kubectl_aliases
-            dest: /home/{{ ansible_user }}/.kubectl_aliases/.kubectl_aliases
-            owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
-            mode: '0644'
-          
-        - name: Source kubectl-aliases in bashrc
-          lineinfile:
-            path: /home/{{ ansible_user }}/.bashrc
-            line: '[ -f ~/.kubectl_aliases/.kubectl_aliases ] && source ~/.kubectl_aliases/.kubectl_aliases'
-            state: present
-    
     - name: Setup kubectl alias for kubecolor
       lineinfile:
         path: /home/{{ ansible_user }}/.bashrc
