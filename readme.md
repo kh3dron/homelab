@@ -1,43 +1,18 @@
 # Homelab
 
-## Services to run
+Changelog / TODOs
 
-- public exposure
-  - plants site (plants.)
-  - webgl site (webgl.)
-  - wallpaper directory (paps.)
-  - scifi database (sfdb.)
-  - topological chess (games.)
-- internal
-  - meme directory (memes.)
-  - LLM Multiclient (chat.)
-  - minecraft server WITH local multiplayer agents (minecraft.)
-  - tekkit classic server (tekkit.)
-  - healthchecks (health.)
-  - podgrab (podgrab.)
-  - gym dashboard (fit.)
-- ops
-  - argo (argo.)
-  - otel (otel.)
-  - GHA runners (gha.)
-  - grafana (grafana.)
-  - istio (istio.)
-  - cogsdash (cogs.)
-- sec
-  - pi.hole
-  - fail2ban
+- [x] Purchase pis
+- [x] assemble physical pi cluster
+- [x] ansible playbooks: 00-system
+- [x] kubeconfig retrieved, got k3s cluster up with one node
 
-## Infra components
+- [ ] argocd enabled
+  - [ ] need ingres
+- [x] ansible playbooks extended to cover Huey, my ubuntu server
+- [ ] cluster with 5 nodes
 
-- ansible playbooks
-- gitops repo + argo hooks
-- semver on all app repos
+## TODO
 
-## Nodes
-
-- pis:
-  - 5 (Ned)
-  - 4 (Maude)
-  - 3B+ (Todd)
-  - 3B (Rod)
-- PC (Huey)
+- [ ] moar apps deployed
+- [ ] architecture diagrams
