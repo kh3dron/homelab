@@ -1,21 +1,28 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: argocd-ingress
+  name: tailscale-operator
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
-  project: default
+  project: tailscale-operator
   source:
     repoURL: https://github.com/kh3dron/homelab.git
     targetRevision: main
-    path: manifests/apps/argocd-ingress
-    directory:
-      exclude: "application.yaml"
+    path: manifests/tailscale-operator
+    kustomize:
+      patches:
+      - target:
+          kind: HelmRelease
+          name: tailscale-operator
+        patch: |-
+          - op: replace
+            path: /apiVersion
+            value: helm.sh/v1
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: tailscale
   syncPolicy:
     automated:
       prune: true

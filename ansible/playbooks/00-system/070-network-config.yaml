@@ -1,0 +1,47 @@
+---
+- name: Configure network interfaces for Raspberry Pis
+  hosts:
+    - ned
+    - maude
+    - rod
+    - todd
+  become: yes
+
+  tasks:
+    - name: Ensure dhcpcd is installed
+      apt:
+        name: dhcpcd5
+        state: present
+        update_cache: yes
+
+    - name: Enable dhcpcd service
+      service:
+        name: dhcpcd
+        state: started
+        enabled: yes
+
+    - name: Configure dhcpcd to wait for network
+      lineinfile:
+        path: /etc/dhcpcd.conf
+        regexp: '^#?waiting for network'
+        line: 'waiting for network'
+        state: present
+
+    - name: Configure network interface to start on boot
+      lineinfile:
+        path: /etc/dhcpcd.conf
+        regexp: '^#?allowinterfaces eth0'
+        line: 'allowinterfaces eth0'
+        state: present
+
+    - name: Ensure network interface is enabled
+      lineinfile:
+        path: /etc/dhcpcd.conf
+        regexp: '^#?interface eth0'
+        line: 'interface eth0'
+        state: present
+
+    - name: Restart dhcpcd service
+      service:
+        name: dhcpcd
+        state: restarted 

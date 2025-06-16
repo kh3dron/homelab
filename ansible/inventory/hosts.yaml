@@ -1,7 +1,7 @@
 ---
 all:
   vars:
-    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10'
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -o RequestTTY=no'
     ansible_ssh_retries: 3
     ansible_ssh_retry_delay: 5
     ned_uname: "{{ lookup('ansible.builtin.pipe', 'op item get homelab.ned --fields username') }}"
@@ -20,6 +20,8 @@ all:
       ansible_user: "{{ huey_uname }}"
       ansible_become_pass: "{{ huey_pass }}"
       ansible_connection: ssh
+      ansible_become_method: sudo
+      ansible_become_flags: "-n"
     # maude:
     #   ansible_host: 192.168.0.82
     #   ansible_user: "{{ maude_uname }}"
