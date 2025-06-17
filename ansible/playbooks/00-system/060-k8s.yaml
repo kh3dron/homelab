@@ -1,8 +1,12 @@
 ---
 - name: Install K8s Tools
-  hosts: all
+  hosts:
+    - maude
+    - rod
+    - todd
+    - ned
   become: yes
-  
+
   tasks:
     - name: Install fzf
       block:
@@ -11,45 +15,58 @@
             name: fzf
             state: present
             update_cache: yes
-            
+
         - name: Setup fzf keybindings and completions
           lineinfile:
             path: /home/{{ ansible_user }}/.bashrc
-            line: '[ -f /usr/share/doc/fzf/examples/key-bindings.bash ] && source /usr/share/doc/fzf/examples/key-bindings.bash'
+            line: "[ -f /usr/share/doc/fzf/examples/key-bindings.bash ] && source /usr/share/doc/fzf/examples/key-bindings.bash"
             state: present
-            
+
         - name: Setup fzf completions
           lineinfile:
             path: /home/{{ ansible_user }}/.bashrc
-            line: '[ -f /usr/share/doc/fzf/examples/completion.bash ] && source /usr/share/doc/fzf/examples/completion.bash'
+            line: "[ -f /usr/share/doc/fzf/examples/completion.bash ] && source /usr/share/doc/fzf/examples/completion.bash"
             state: present
-    
+
     - name: Install kubecolor
       block:
-        - name: Install Go if not already installed
-          apt:
-            name: golang
+        - name: Download Go binary
+          get_url:
+            url: https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
+            dest: /tmp/go.tar.gz
+            mode: "0644"
+
+        - name: Remove old Go installation if exists
+          file:
+            path: /usr/local/go
+            state: absent
+
+        - name: Extract Go binary
+          unarchive:
+            src: /tmp/go.tar.gz
+            dest: /usr/local
+            remote_src: yes
+
+        - name: Add Go to PATH
+          lineinfile:
+            path: /home/{{ ansible_user }}/.bashrc
+            line: "export PATH=$PATH:/usr/local/go/bin"
             state: present
-            update_cache: yes
-          
+
         - name: Ensure GOPATH exists
           file:
             path: /home/{{ ansible_user }}/go
             state: directory
             owner: "{{ ansible_user }}"
             group: "{{ ansible_user }}"
-            mode: '0755'
-          
-        - name: Install kubecolor via go install
-          shell: |
-            su - {{ ansible_user }} -c "go install github.com/kubecolor/kubecolor@latest"
-          
+            mode: "0755"
+
         - name: Ensure GOBIN is in PATH
           lineinfile:
             path: /home/{{ ansible_user }}/.bashrc
-            line: 'export PATH=$PATH:/home/{{ ansible_user }}/go/bin'
+            line: "export PATH=$PATH:/home/{{ ansible_user }}/go/bin"
             state: present
-    
+
     - name: Setup kubectl alias for kubecolor
       lineinfile:
         path: /home/{{ ansible_user }}/.bashrc
