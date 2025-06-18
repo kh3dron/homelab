@@ -16,3 +16,19 @@
 
 - [ ] moar apps deployed
 - [ ] architecture diagrams
+
+## notes
+
+- todo when resetting pis
+
+ssh-keygen -R 192.168.0.84
+ssh-copy-id ned@192.168.0.84
+
+ssh-keygen -R 192.168.0.85
+ssh-copy-id maude@192.168.0.85
+
+ssh-keygen -R 192.168.0.82
+ssh-copy-id rod@192.168.0.82
+
+ssh-keygen -R 192.168.0.83
+ssh-copy-id todd@192.168.0.83
