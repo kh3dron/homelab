@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pihole
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: pihole
+  source:
+    repoURL: https://github.com/kh3dron/homelab.git
+    targetRevision: main
+    path: manifests/pihole
+    kustomize:
+      patches:
+        - target:
+            kind: HelmRelease
+            name: pihole
+          patch: |-
+            - op: replace
+              path: /apiVersion
+              value: helm.sh/v1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pihole
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
