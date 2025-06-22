@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: tealgardens-com
+  namespace: tealgardens-com
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: "tealgardens-com"
+      server: "*"
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

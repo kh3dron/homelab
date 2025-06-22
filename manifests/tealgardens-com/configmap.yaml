@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: static-webapp-files
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Static Webapp</title>
+    </head>
+    <body>
+        <h1>Welcome to your Static Webapp!</h1>
+        <p>This is a placeholder. Replace this with your actual static content.</p>
+    </body>
+    </html> 

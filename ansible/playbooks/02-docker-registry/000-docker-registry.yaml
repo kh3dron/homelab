@@ -1,0 +1,82 @@
+---
+- name: Deploy Docker Registry to Huey
+  hosts: huey
+  become: true
+  tasks:
+    - name: Create docker registry directory
+      file:
+        path: /opt/docker-registry
+        state: directory
+        mode: "0755"
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: assets/docker-compose.yml
+        dest: /opt/docker-registry/docker-compose.yml
+        mode: "0644"
+
+    - name: Remove obsolete version field from docker-compose.yml
+      replace:
+        path: /opt/docker-registry/docker-compose.yml
+        regexp: "^version: .*$"
+        replace: "# version field removed - obsolete in docker compose v2"
+
+    - name: Copy build script
+      copy:
+        src: assets/build-and-push.sh
+        dest: /opt/docker-registry/build-and-push.sh
+        mode: "0755"
+
+    - name: Copy setup script
+      copy:
+        src: assets/setup.sh
+        dest: /opt/docker-registry/setup.sh
+        mode: "0755"
+
+    - name: Create registry data directory
+      file:
+        path: /opt/docker-registry/data
+        state: directory
+        mode: "0755"
+
+    - name: Create registry auth directory
+      file:
+        path: /opt/docker-registry/auth
+        state: directory
+        mode: "0755"
+
+    - name: Check if registry is already running on port 5000
+      shell: docker ps --filter "publish=5000" --format "{{ '{{' }}.Names{{ '}}' }}"
+      register: existing_registry
+      changed_when: false
+
+    - name: Stop existing registry if running
+      community.docker.docker_container:
+        name: "{{ existing_registry.stdout }}"
+        state: stopped
+      when: existing_registry.stdout != ""
+
+    - name: Remove existing registry container
+      community.docker.docker_container:
+        name: "{{ existing_registry.stdout }}"
+        state: absent
+      when: existing_registry.stdout != ""
+
+    - name: Start Docker registry
+      community.docker.docker_compose_v2:
+        project_src: /opt/docker-registry
+        state: present
+      register: registry_result
+
+    - name: Wait for registry to be ready
+      uri:
+        url: http://localhost:5000/v2/_catalog
+        method: GET
+      register: registry_health
+      retries: 10
+      delay: 5
+      until: registry_health.status == 200
+
+    - name: Show registry status
+      debug:
+        msg: "Docker registry is running at http://huey.local:5000"
