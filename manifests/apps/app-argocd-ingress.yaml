@@ -7,6 +7,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
+  enableHelm: true
   source:
     repoURL: https://github.com/kh3dron/homelab.git
     targetRevision: main
