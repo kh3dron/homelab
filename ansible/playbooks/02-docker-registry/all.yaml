@@ -1,2 +1,3 @@
 ---
 - import_playbook: 000-docker-registry.yaml
+- import_playbook: 001-k3s-insecure-registry.yaml

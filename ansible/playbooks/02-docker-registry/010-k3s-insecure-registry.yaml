@@ -16,34 +16,18 @@
         content: |
           configs:
             "192.168.0.17:5000":
-              tls:
-                insecure_skip_verify: true
+              http: true
             "huey.local:5000":
-              tls:
-                insecure_skip_verify: true
+              http: true
         mode: "0644"
       register: registry_config
 
     - name: Restart K3s service if config changed
-      systemctl:
-        name: k3s
-        state: restarted
+      command: systemctl restart k3s
       when: registry_config.changed
       ignore_errors: yes
 
     - name: Restart K3s agent service if config changed
-      systemctl:
-        name: k3s-agent
-        state: restarted
+      command: systemctl restart k3s-agent
       when: registry_config.changed
       ignore_errors: yes
-
-    - name: Wait for K3s to be ready after restart
-      command: k3s kubectl get nodes
-      register: node_status
-      until: node_status.rc == 0
-      retries: 10
-      delay: 30
-      changed_when: false
-      failed_when: false
-      when: registry_config.changed
