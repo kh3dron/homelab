@@ -11,15 +11,6 @@ spec:
     repoURL: https://github.com/kh3dron/homelab.git
     targetRevision: main
     path: manifests/tailscale-operator
-    kustomize:
-      patches:
-      - target:
-          kind: HelmRelease
-          name: tailscale-operator
-        patch: |-
-          - op: replace
-            path: /apiVersion
-            value: helm.sh/v1
   destination:
     server: https://kubernetes.default.svc
     namespace: tailscale
