@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/kh3dron/homelab.git
     targetRevision: main
-    path: manifests/apps/argocd-ingress
+    path: manifests/argocd-ingress
     directory:
       exclude: "application.yaml"
   destination:
