@@ -1,0 +1,86 @@
+---
+- name: Install and configure zsh as default shell
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Install zsh
+      apt:
+        name: zsh
+        state: present
+        update_cache: yes
+        
+    - name: Get current user info
+      user:
+        name: "{{ ansible_user }}"
+      register: user_info
+      
+    - name: Change default shell to zsh for ansible user
+      user:
+        name: "{{ ansible_user }}"
+        shell: /bin/zsh
+        
+    - name: Create .zshrc for user
+      copy:
+        dest: /home/{{ ansible_user }}/.zshrc
+        content: |
+          # Basic zsh configuration
+          # Enable Powerlevel10k instant prompt (if available)
+          if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+            source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+          fi
+          
+          # History configuration
+          HISTFILE=~/.zsh_history
+          HISTSIZE=10000
+          SAVEHIST=10000
+          setopt SHARE_HISTORY
+          setopt HIST_VERIFY
+          setopt HIST_IGNORE_ALL_DUPS
+          setopt HIST_IGNORE_SPACE
+          
+          # Basic zsh options
+          setopt AUTO_CD
+          setopt AUTO_PUSHD
+          setopt PUSHD_IGNORE_DUPS
+          setopt GLOB_COMPLETE
+          setopt PUSHD_MINUS
+          
+          # Completion system
+          autoload -U compinit && compinit
+          zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+          zstyle ':completion:*' list-colors ''
+          zstyle ':completion:*' menu select
+          
+          # Key bindings
+          bindkey -e  # Use emacs key bindings
+          bindkey '^[[A' history-search-backward
+          bindkey '^[[B' history-search-forward
+          
+          # Prompt configuration (bash-like with colors)
+          autoload -U colors && colors
+          PROMPT='%F{green}%n@%m%f:%F{blue}%~%f$ '
+          
+          # Aliases
+          alias ll='ls -alF'
+          alias la='ls -A'
+          alias l='ls -CF'
+          alias grep='grep --color=auto'
+          alias fgrep='fgrep --color=auto'
+          alias egrep='egrep --color=auto'
+          
+          # Run neofetch at login
+          neofetch
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+        
+    - name: Ensure .zshrc is sourced properly
+      lineinfile:
+        path: /home/{{ ansible_user }}/.zshrc
+        line: "# Zsh configuration managed by Ansible"
+        state: present
+        create: yes
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'

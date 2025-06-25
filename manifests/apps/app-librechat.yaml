@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: librechat
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  enableHelm: true
+  source:
+    repoURL: https://danny-avila.github.io/LibreChat
+    chart: librechat
+    targetRevision: "*"
+    helm:
+      values: |
+        existingSecret: librechat-credentials-env
+        ingress:
+          enabled: true
+          className: "traefik"
+          hosts:
+            - host: librechat.local
+              paths:
+                - path: /
+                  pathType: Prefix
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: librechat
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

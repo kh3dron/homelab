@@ -5,7 +5,7 @@
 - import_playbook: 030-alwayson.yaml
 - import_playbook: 040-docker-pis.yaml
 - import_playbook: 041-docker-huey.yaml
-- import_playbook: 042-docker-registry.yaml
 - import_playbook: 050-helm.yaml
 - import_playbook: 060-k8s.yaml
 - import_playbook: 070-network-config.yaml
+- import_playbook: 080-zsh.yaml
