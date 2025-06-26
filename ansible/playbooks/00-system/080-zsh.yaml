@@ -69,6 +69,7 @@
           alias fgrep='fgrep --color=auto'
           alias egrep='egrep --color=auto'
           
+          cd ~/Documents/Github/
           # Run neofetch at login
           neofetch
         owner: "{{ ansible_user }}"
